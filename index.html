@@ -189,6 +189,75 @@ html[data-theme="light"] .icon-sun{display:none}
   .grid{grid-template-columns:1fr}
 }
 
+/* ===== 在线下载台（Modrinth 镜像） ===== */
+.mr{--focus-c:var(--c-mod);margin:0 0 28px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.mr-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.mr-head h2{font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.mr-tagline{font-size:11.5px;font-weight:800;line-height:1;padding:4px 7px;border-radius:5px;color:var(--ink-mod);border:1px solid var(--line);background:rgba(127,127,127,.14)}
+@supports (background:color-mix(in srgb,red 16%,transparent)){
+  .mr-tagline{border-color:color-mix(in srgb,var(--c-mod) 42%,var(--line));background:color-mix(in srgb,var(--c-mod) 16%,transparent)}
+}
+.mr-note{color:var(--text-dim);font-size:13px}
+.mr-types{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 12px}
+.mr-type{padding:6px 12px;border:1px solid var(--line);border-radius:7px;background:var(--panel-2);color:var(--text-dim);font-size:13px;font-weight:700;line-height:1.3;cursor:pointer;white-space:nowrap}
+.mr-type:hover{color:var(--text);border-color:var(--text-dim)}
+.mr-type[aria-pressed="true"]{color:var(--text);border-color:var(--c-mod);background:rgba(127,127,127,.2)}
+@supports (background:color-mix(in srgb,red 16%,transparent)){
+  .mr-type[aria-pressed="true"]{background:color-mix(in srgb,var(--c-mod) 16%,var(--panel-2))}
+}
+.mr-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.mr-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.mr-field-grow{flex:1 1 240px}
+.mr-field label{font-size:12.5px;font-weight:700;color:var(--text-dim)}
+.mr-field input,.mr-field select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);font-size:13.5px;line-height:1.4;min-width:0}
+.mr-field select{max-width:190px}
+.mr-go{padding:9px 18px}
+.mr-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--text-dim)}
+.mr-status{line-height:1.5}
+.mr-status.warn{color:var(--ink-world)}
+.mr-mirror{display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.mr-mirror input{margin:0}
+.mr-results{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.mr-item{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.mr-mark{flex:0 0 auto;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--ink-mod);background:rgba(127,127,127,.16)}
+@supports (background:color-mix(in srgb,red 18%,transparent)){
+  .mr-mark{background:color-mix(in srgb,var(--c-mod) 18%,transparent)}
+}
+.mr-info{flex:1 1 260px;min-width:0}
+.mr-title{font-size:14.5px;font-weight:800;line-height:1.35}
+.mr-title a{text-decoration:none}
+.mr-title a:hover{text-decoration:underline}
+.mr-sub{margin-top:3px;font-size:12.5px;line-height:1.5;color:var(--text-dim)}
+.mr-sub::first-line{color:var(--text-dim)}
+.mr-stats{margin-top:5px;font-size:12px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.mr-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.mr-tag{font-size:11.5px;font-weight:700;line-height:1;padding:4px 6px;border:1px solid var(--line);border-radius:4px;color:var(--text-dim)}
+.mr-act{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.mr-dl{border-color:var(--c-mod);color:var(--ink-mod)}
+.mr-dl[disabled]{opacity:.6;cursor:progress}
+.mr-line{flex:1 1 100%;font-size:12.5px;line-height:1.55;color:var(--ink-launcher);margin:0}
+.mr-line.warn{color:var(--ink-world)}
+.mr-line a{color:var(--ink-mod);font-weight:700;text-decoration:none}
+.mr-line a:hover{text-decoration:underline}
+.mr-vers{flex:1 1 100%;margin-top:2px;padding-top:8px;border-top:1px dashed var(--line);display:flex;flex-direction:column;gap:6px}
+.mr-vrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;line-height:1.5}
+.mr-vrow .vn{font-weight:700;font-variant-numeric:tabular-nums}
+.mr-vrow .vm{color:var(--text-dim)}
+.mr-vdl{margin-left:auto;display:inline-flex;align-items:center;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink-mod);font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap}
+.mr-vdl:hover{border-color:var(--c-mod)}
+.mr-empty{padding:20px 14px;border:1px dashed var(--line);border-radius:10px;text-align:center;color:var(--text-dim);font-size:13.5px;line-height:1.6}
+.mr-more{display:flex;justify-content:center;width:100%;margin-top:12px}
+@media (max-width:640px){
+  .mr{padding:14px}
+  .mr-act{margin-left:0;width:100%}
+  .mr-field{flex:1 1 100%}
+  .mr-field select{max-width:none;width:100%}
+  .mr-field-grow{flex:1 1 100%}
+}
+@media (prefers-reduced-motion: reduce){
+  .mr-type,.mr-dl{transition:none}
+}
+
 </style>
 </head>
 <body>
@@ -221,6 +290,43 @@ html[data-theme="light"] .icon-sun{display:none}
         <button class="btn" type="button" data-goto="mod">找模组</button>
         <button class="btn" type="button" data-goto="shader">找光影</button>
       </div>
+    </section>
+    <section class="mr" id="mr" aria-labelledby="h-mr">
+      <header class="mr-head">
+        <h2 id="h-mr">
+          <span class="cat-icon" aria-hidden="true" style="color:var(--ink-mod)"><svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.6v8M6.2 8 9 10.8 11.8 8"/><path d="M3.2 12.2v1.6c0 .8.6 1.4 1.4 1.4h8.8c.8 0 1.4-.6 1.4-1.4v-1.6"/></svg></span>
+          在线下载台
+          <span class="mr-tagline">Modrinth 镜像</span>
+        </h2>
+        <span class="mr-note">选好版本和加载器，点下载直接拿文件，不用跳到外站再找。</span>
+      </header>
+      <div class="mr-types" role="group" aria-label="资源类型">
+        <button class="mr-type" type="button" data-type="mod" aria-pressed="true">模组</button>
+        <button class="mr-type" type="button" data-type="shader" aria-pressed="false">光影</button>
+        <button class="mr-type" type="button" data-type="resourcepack" aria-pressed="false">资源包</button>
+        <button class="mr-type" type="button" data-type="modpack" aria-pressed="false">整合包</button>
+      </div>
+      <form class="mr-filters" id="mr-form">
+        <div class="mr-field mr-field-grow">
+          <label for="mr-q">关键词</label>
+          <input id="mr-q" type="search" placeholder="sodium / 钠 / 优化…回车搜索" autocomplete="off">
+        </div>
+        <div class="mr-field">
+          <label for="mr-mc">游戏版本</label>
+          <select id="mr-mc"><option value="">全部版本</option></select>
+        </div>
+        <div class="mr-field">
+          <label for="mr-loader">加载器</label>
+          <select id="mr-loader"><option value="">不限</option></select>
+        </div>
+        <button class="btn mr-go" type="submit">搜索</button>
+      </form>
+      <div class="mr-bar">
+        <span id="mr-status" class="mr-status" role="status" aria-live="polite">正在准备下载台…</span>
+        <label class="mr-mirror" for="mr-proxy"><input id="mr-proxy" type="checkbox" checked> 下载走国内镜像</label>
+      </div>
+      <div id="mr-results" class="mr-results"></div>
+      <button id="mr-more" class="btn mr-more" type="button" hidden>加载更多</button>
     </section>
     <nav class="hotbar" aria-label="资源分类">
       <div class="hotbar-inner">
@@ -974,6 +1080,336 @@ html[data-theme="light"] .icon-sun{display:none}
   });
 
   update();
+})();
+</script>
+<script>
+/* 在线下载台：Modrinth 镜像（API 走 mod.mcimirror.top，文件经镜像路由 302 到官方 CDN） */
+(function(){
+  "use strict";
+  var API = "https://mod.mcimirror.top/modrinth/v2";
+  var OFFICIAL = "https://api.modrinth.com/v2";
+  var CDN_HOST = "https://mod.mcimirror.top";
+  var TYPE_NAMES = { mod:"模组", shader:"光影", resourcepack:"资源包", modpack:"整合包" };
+  var LOADER_LABELS = { fabric:"Fabric", forge:"Forge", neoforge:"NeoForge", quilt:"Quilt", liteloader:"LiteLoader", iris:"Iris", optifine:"OptiFine", canvas:"Canvas", minecraft:"原版" };
+  var LOADER_ORDER = { fabric:1, forge:2, neoforge:3, quilt:4, minecraft:1, iris:1, optifine:2, canvas:3, liteloader:9 };
+  var FALLBACK_LOADERS = {
+    mod:["fabric","forge","neoforge","quilt","liteloader"],
+    shader:["iris","optifine","canvas"],
+    resourcepack:["minecraft"],
+    modpack:["fabric","forge","neoforge","quilt"]
+  };
+  var state = { type:"mod", offset:0, limit:10, total:0, loading:false, mirrorOk:true, loaders:null };
+
+  function $(id){ return document.getElementById(id); }
+  var el = {
+    root: $("mr"), form: $("mr-form"), q: $("mr-q"), mc: $("mr-mc"), loader: $("mr-loader"),
+    status: $("mr-status"), results: $("mr-results"), more: $("mr-more"), proxy: $("mr-proxy")
+  };
+  if (!el.root || !el.form || !el.results) { return; }
+
+  function esc(s){
+    return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+  function fmtNum(n){
+    n = Number(n) || 0;
+    if (n >= 1000000) { return (n / 1000000).toFixed(n >= 10000000 ? 0 : 1) + "M"; }
+    if (n >= 1000) { return (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k"; }
+    return String(n);
+  }
+  function fmtSize(b){
+    b = Number(b) || 0;
+    if (!b) { return "未知大小"; }
+    if (b >= 1048576) { return (b / 1048576).toFixed(b >= 10485760 ? 0 : 1) + " MB"; }
+    return Math.max(1, Math.round(b / 1024)) + " KB";
+  }
+  function setStatus(msg, warn){
+    el.status.textContent = msg;
+    el.status.className = "mr-status" + (warn ? " warn" : "");
+  }
+
+  function apiFetch(path, params){
+    var q = params ? ("?" + params) : "";
+    function get(base){
+      return fetch(base + path + q).then(function(r){
+        if (!r.ok) { throw new Error("HTTP " + r.status); }
+        return r.json();
+      });
+    }
+    return get(API).catch(function(err){
+      state.mirrorOk = false;
+      return get(OFFICIAL).catch(function(){ throw err; });
+    });
+  }
+
+  function fillLoaders(){
+    var names = [];
+    var all = state.loaders;
+    if (all && all.length) {
+      all.forEach(function(l){
+        var types = l.supported_project_types || l.project_types || [];
+        if (types.indexOf(state.type) !== -1) { names.push(l.name); }
+      });
+    }
+    if (!names.length) { names = FALLBACK_LOADERS[state.type] || []; }
+    names.sort(function(a, b){ return (LOADER_ORDER[a] || 9) - (LOADER_ORDER[b] || 9); });
+    var keep = el.loader.value;
+    var html = '<option value="">不限</option>';
+    names.forEach(function(n){
+      html += '<option value="' + esc(n) + '">' + esc(LOADER_LABELS[n] || n) + '</option>';
+    });
+    el.loader.innerHTML = html;
+    if (names.indexOf(keep) !== -1) { el.loader.value = keep; }
+  }
+
+  function pickFile(v){
+    if (!v || !v.files || !v.files.length) { return null; }
+    for (var i = 0; i < v.files.length; i++) {
+      if (v.files[i].primary) { return v.files[i]; }
+    }
+    return v.files[0];
+  }
+  function mirrorUrl(u){
+    return String(u || "").replace(/^https?:\/\/cdn\.modrinth\.com\//, CDN_HOST + "/");
+  }
+  function fileUrl(u){
+    return el.proxy.checked ? mirrorUrl(u) : u;
+  }
+  function triggerDownload(url, name){
+    var a = document.createElement("a");
+    a.href = url;
+    a.rel = "noopener";
+    if (name) { a.setAttribute("download", name); }
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+  function closestItem(node){
+    while (node && node !== document && !(node.classList && node.classList.contains("mr-item"))) { node = node.parentNode; }
+    return (node && node.classList && node.classList.contains("mr-item")) ? node : null;
+  }
+  function setLine(item, html, warn, cls){
+    var p = item.querySelector(cls ? "." + cls : ".mr-line");
+    if (!p) { return; }
+    p.innerHTML = html;
+    p.hidden = false;
+    p.className = (cls ? "mr-line " + cls : "mr-line") + (warn ? " warn" : "");
+  }
+
+  function resolveVersions(id){
+    var filters = [];
+    if (el.mc.value) { filters.push("game_versions=" + encodeURIComponent(JSON.stringify([el.mc.value]))); }
+    if (el.loader.value) { filters.push("loaders=" + encodeURIComponent(JSON.stringify([el.loader.value]))); }
+    var q = filters.join("&");
+    return apiFetch("/project/" + encodeURIComponent(id) + "/version", q).then(function(list){
+      if ((list && list.length) || !q) { return { list: list || [], relaxed: false }; }
+      return apiFetch("/project/" + encodeURIComponent(id) + "/version").then(function(all){
+        return { list: all || [], relaxed: true };
+      });
+    });
+  }
+
+  function showDeps(v, item){
+    var ids = [];
+    (v.dependencies || []).forEach(function(d){
+      if (d.dependency_type === "required" && d.project_id && ids.indexOf(d.project_id) === -1) { ids.push(d.project_id); }
+    });
+    if (!ids.length) { return; }
+    apiFetch("/projects", "ids=" + encodeURIComponent(JSON.stringify(ids))).then(function(list){
+      var links = (list || []).map(function(p){
+        return '<a href="https://modrinth.com/' + esc(p.project_type || "mod") + "/" + esc(p.slug) + '" target="_blank" rel="noopener">' + esc(p.title) + "</a>";
+      });
+      if (links.length) { setLine(item, "该版本需要前置：" + links.join("、") + "（记得一起装）", true, "mr-dep"); }
+    }).catch(function(){});
+  }
+
+  function downloadLatest(item, btn){
+    var id = item.getAttribute("data-id");
+    btn.disabled = true;
+    btn.textContent = "查找中…";
+    resolveVersions(id).then(function(res){
+      if (!res.list.length) {
+        setLine(item, "这个项目没有可下载的文件。", true);
+        return;
+      }
+      var v = res.list[0];
+      var f = pickFile(v);
+      if (!f) {
+        setLine(item, "版本的下载文件缺失，换一个版本试试。", true);
+        return;
+      }
+      triggerDownload(fileUrl(f.url), f.filename);
+      setLine(item,
+        "已开始下载 " + esc(f.filename) + " · " + fmtSize(f.size) +
+        (res.relaxed ? "（当前筛选没有匹配版本，已改用最新版）" : "") +
+        ' · <a href="' + esc(f.url) + '" target="_blank" rel="noopener">直连备用</a>',
+        !!res.relaxed);
+      showDeps(v, item);
+    }).catch(function(err){
+      setLine(item, "下载信息获取失败：" + esc(err.message) + "，稍后重试或直接去 Modrinth 页面。", true);
+    }).then(function(){
+      btn.disabled = false;
+      btn.textContent = "下载";
+    });
+  }
+
+  function toggleVersions(item, id){
+    var box = item.querySelector(".mr-vers");
+    if (!box.hidden) { box.hidden = true; return; }
+    box.hidden = false;
+    if (box.getAttribute("data-loaded") === "1") { return; }
+    box.innerHTML = '<div class="mr-vrow"><span class="vm">正在加载版本…</span></div>';
+    resolveVersions(id).then(function(res){
+      if (!res.list.length) {
+        box.innerHTML = '<div class="mr-vrow"><span class="vm">没有可下载版本</span></div>';
+        return;
+      }
+      var rows = res.list.slice(0, 8).map(function(v){
+        var f = pickFile(v);
+        if (!f) { return ""; }
+        var mcs = (v.game_versions || []).slice(-4).join(" / ");
+        var lds = (v.loaders || []).join(" / ");
+        return '<div class="mr-vrow"><span class="vn">' + esc(v.version_number) + "</span>" +
+          '<span class="vm">' + esc(mcs) + (lds ? " · " + esc(lds) : "") + " · " + fmtSize(f.size) + "</span>" +
+          '<a class="mr-vdl" href="' + esc(fileUrl(f.url)) + '" download="' + esc(f.filename) + '" rel="noopener">下载</a>' +
+          (el.proxy.checked ? '<a class="mr-vdl mr-vdl-alt" href="' + esc(f.url) + '" download="' + esc(f.filename) + '" rel="noopener">直连</a>' : "") + '</div>';
+      }).join("");
+      box.innerHTML = rows + (res.relaxed ? '<div class="mr-vrow"><span class="vm">当前筛选没有匹配版本，以上是该类型下最新的版本</span></div>' : "");
+      box.setAttribute("data-loaded", "1");
+    }).catch(function(err){
+      box.innerHTML = '<div class="mr-vrow"><span class="vm">版本加载失败：' + esc(err.message) + "</span></div>";
+    });
+  }
+
+  function render(hits){
+    var html = "";
+    hits.forEach(function(h){
+      var letter = String(h.title || "?").trim().charAt(0).toUpperCase();
+      var ptype = h.project_type || state.type;
+      var tags = (h.categories || []).slice(0, 4).map(function(c){
+        return '<span class="mr-tag">' + esc(c) + "</span>";
+      }).join("");
+      html += '<article class="mr-item" data-id="' + esc(h.project_id) + '">' +
+        '<span class="mr-mark" aria-hidden="true">' + esc(letter) + "</span>" +
+        '<div class="mr-info">' +
+          '<h3 class="mr-title"><a href="https://modrinth.com/' + esc(ptype) + "/" + esc(h.slug) + '" target="_blank" rel="noopener">' + esc(h.title) + "</a></h3>" +
+          '<p class="mr-sub">' + esc(h.description) + "</p>" +
+          '<div class="mr-stats">作者 ' + esc(h.author || "—") + " · 下载 " + fmtNum(h.downloads) + " · 收藏 " + fmtNum(h.follows) + "</div>" +
+          (tags ? '<div class="mr-tags">' + tags + "</div>" : "") +
+        "</div>" +
+        '<div class="mr-act">' +
+          '<button class="btn mr-dl" type="button">下载</button>' +
+          '<button class="btn mr-versbtn" type="button">选版本</button>' +
+        "</div>" +
+        '<p class="mr-line" hidden></p>' +
+        '<p class="mr-line mr-dep" hidden></p>' +
+        '<div class="mr-vers" hidden></div>' +
+      "</article>";
+    });
+    el.results.insertAdjacentHTML("beforeend", html);
+  }
+
+  function search(reset){
+    if (state.loading) { return; }
+    state.loading = true;
+    if (reset) {
+      state.offset = 0;
+      state.total = 0;
+      el.results.innerHTML = "";
+      el.more.hidden = true;
+    }
+    setStatus(reset ? "正在搜索…" : "正在加载更多…");
+    var q = el.q.value.trim();
+    var facets = [["project_type:" + state.type]];
+    if (el.mc.value) { facets.push(["versions:" + el.mc.value]); }
+    if (el.loader.value) { facets.push(["categories:" + el.loader.value]); }
+    var params = "query=" + encodeURIComponent(q) +
+      "&limit=" + state.limit + "&offset=" + state.offset +
+      "&index=" + (q ? "relevance" : "downloads") +
+      "&facets=" + encodeURIComponent(JSON.stringify(facets));
+    apiFetch("/search", params).then(function(data){
+      var hits = (data && data.hits) || [];
+      state.total = Number(data && data.total_hits) || 0;
+      if (!hits.length) {
+        if (state.offset === 0) {
+          el.results.innerHTML = '<div class="mr-empty">没有匹配的' + esc(TYPE_NAMES[state.type]) +
+            "。换个关键词，或者把游戏版本、加载器调成“全部版本 / 不限”再试。</div>";
+        }
+        setStatus("0 个结果");
+        el.more.hidden = true;
+        return;
+      }
+      render(hits);
+      state.offset += hits.length;
+      el.more.hidden = state.offset >= state.total;
+      setStatus("共 " + state.total + " 个 · 已显示 " + state.offset + " 个" +
+        (state.mirrorOk ? "" : "（镜像不稳，已改用官方接口）"));
+    }).catch(function(err){
+      setStatus("搜索失败：" + err.message + "，检查网络后重试。", true);
+    }).then(function(){
+      state.loading = false;
+    });
+  }
+
+  /* 事件绑定 */
+  el.form.addEventListener("submit", function(e){
+    e.preventDefault();
+    search(true);
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".mr-type"), function(b){
+    b.addEventListener("click", function(){
+      var t = b.getAttribute("data-type");
+      if (!t || t === state.type) { return; }
+      state.type = t;
+      Array.prototype.forEach.call(document.querySelectorAll(".mr-type"), function(x){
+        x.setAttribute("aria-pressed", String(x === b));
+      });
+      fillLoaders();
+      search(true);
+    });
+  });
+
+  el.more.addEventListener("click", function(){ search(false); });
+
+  el.proxy.addEventListener("change", function(){
+    Array.prototype.forEach.call(el.results.querySelectorAll(".mr-vers"), function(box){
+      box.innerHTML = "";
+      box.hidden = true;
+      box.setAttribute("data-loaded", "0");
+    });
+  });
+
+  el.results.addEventListener("click", function(e){
+    var target = e.target;
+    var item = closestItem(target);
+    if (!item) { return; }
+    var id = item.getAttribute("data-id");
+    if (target.classList && target.classList.contains("mr-dl")) {
+      downloadLatest(item, target);
+    } else if (target.classList && target.classList.contains("mr-versbtn")) {
+      toggleVersions(item, id);
+    }
+  });
+
+  /* 初始化：加载器 / 游戏版本 / 首屏热门 */
+  fillLoaders();
+  search(true);
+  apiFetch("/tag/loader").then(function(list){
+    state.loaders = list;
+    fillLoaders();
+  }).catch(function(){});
+  apiFetch("/tag/game_version").then(function(list){
+    var rel = (list || []).filter(function(v){ return v.version_type === "release"; });
+    var keep = el.mc.value;
+    var html = '<option value="">全部版本</option>';
+    rel.forEach(function(v){
+      html += '<option value="' + esc(v.version) + '">' + esc(v.version) + "</option>";
+    });
+    el.mc.innerHTML = html;
+    if (keep) { el.mc.value = keep; }
+  }).catch(function(){});
 })();
 </script>
 </body>
