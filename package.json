@@ -1,0 +1,8 @@
+{
+  "name": "mcnav-functions",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@edgeone/pages-blob": "latest"
+  }
+}

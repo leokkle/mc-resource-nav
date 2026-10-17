@@ -340,9 +340,92 @@ html[data-theme="light"] .icon-sun{display:none}
   .pull-act{flex-direction:row}
 }
 
+/* ===== 令牌登录 ===== */
+body.auth-locked{overflow:hidden}
+.gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+@supports (backdrop-filter:blur(6px)){
+  .gate{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(8px)}
+}
+.gate[hidden]{display:none}
+.gate-card{width:100%;max-width:392px;padding:26px 24px 22px;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:0 18px 48px rgba(0,0,0,.28)}
+.gate-brand{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800;color:var(--text-dim);margin-bottom:14px}
+.gate-logo{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;color:var(--ink-launcher);background:var(--panel-2)}
+.gate-card h2{font-size:20px;line-height:1.3}
+.gate-sub{margin-top:7px;font-size:13px;line-height:1.65;color:var(--text-dim)}
+.gate-label{display:block;margin:18px 0 6px;font-size:12.5px;font-weight:800;color:var(--text-dim)}
+.gate-input{position:relative;display:flex;align-items:center}
+#gate-token{width:100%;padding:11px 60px 11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);color:var(--text);font-size:14px;font-family:var(--font-mono);letter-spacing:.02em}
+#gate-token::placeholder{font-family:var(--font-ui);letter-spacing:0;color:var(--text-dim)}
+#gate-token:focus{outline:2px solid var(--c-mod);outline-offset:1px;border-color:var(--c-mod)}
+.gate-eye{position:absolute;right:6px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--text-dim);font-size:12px;font-weight:700;cursor:pointer}
+.gate-eye:hover{color:var(--text);border-color:var(--text-dim)}
+.gate-msg{min-height:20px;margin:9px 0 0;font-size:12.5px;line-height:1.5;color:var(--text-dim)}
+.gate-msg.bad{color:var(--ink-modpack)}
+.gate-msg.good{color:var(--ink-launcher)}
+.gate-submit{width:100%;justify-content:center;margin-top:6px;padding:11px 14px;border-color:var(--c-mod);color:var(--ink-mod);font-size:14px}
+.gate-submit:hover{background:rgba(127,127,127,.14)}
+.gate-submit[disabled]{opacity:.55;cursor:not-allowed}
+.gate-foot{margin-top:14px;font-size:11.5px;line-height:1.6;color:var(--text-dim);text-align:center}
+.gate.shake .gate-card{animation:gateShake .32s ease}
+@keyframes gateShake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  50%{transform:translateX(6px)}
+  75%{transform:translateX(-3px)}
+}
+/* 顶栏账号区 */
+.account{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.account[hidden]{display:none}
+.role-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-weight:800;line-height:1.2;white-space:nowrap;color:var(--text-dim);background:var(--panel-2)}
+.role-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.role-badge.is-admin{color:var(--ink-modpack);border-color:var(--c-modpack)}
+.role-badge.is-member{color:var(--ink-server);border-color:var(--c-server)}
+@media (max-width:640px){
+  .role-badge{padding:5px 8px;font-size:11.5px}
+  .gate-card{padding:22px 18px 18px}
+}
+@media (prefers-reduced-motion: reduce){
+  .gate.shake .gate-card{animation:none}
+}
+
+
+/* ===== 上传 / 审核 ===== */
+.count-dot{display:inline-block;min-width:16px;padding:0 5px;margin-left:4px;border-radius:9px;background:#E5534B;color:#fff;font-size:11px;line-height:16px;text-align:center;font-weight:700}
+.dlg{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);width:min(580px,94vw);padding:0;box-shadow:0 24px 70px rgba(0,0,0,.45);font:inherit}
+.dlg::backdrop{background:rgba(0,0,0,.55)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}
+.dlg-head h3{margin:0;font-size:15.5px;font-weight:800;letter-spacing:.2px}
+.dlg-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.dlg-foot{display:flex;gap:10px;justify-content:flex-end;padding:13px 18px;border-top:1px solid var(--line)}
+.dlg-close{width:30px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1}
+.up-drop{display:block;border:1px dashed var(--line);border-radius:10px;padding:20px 16px;text-align:center;background:var(--panel-2);cursor:pointer;transition:border-color .15s ease}
+.up-drop:hover,.up-drop.is-over{border-color:#4A9EFF}
+.up-drop input{display:none}
+.up-drop b{font-size:13.5px}
+.up-file{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--text-dim)}
+.up-picked{margin-top:8px;font-size:13px;font-weight:700;color:#4A9EFF;word-break:break-all}
+.dlg input.up-note{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);font:inherit;font-size:13px}
+.dlg input.up-note:focus{outline:2px solid rgba(74,158,255,.35);border-color:#4A9EFF}
+.up-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;display:none}
+.up-bar.show{display:block}
+.up-bar i{display:block;height:100%;width:0;background:#4A9EFF;transition:width .18s ease}
+.up-msg{font-size:12.8px;color:var(--text-dim);min-height:18px;line-height:1.5}
+.up-msg.err{color:#E5534B}
+.up-msg.ok{color:#3FB950}
+.rv-list{display:flex;flex-direction:column;gap:10px;max-height:54vh;overflow:auto;padding-right:2px}
+.rv-item{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.rv-main{flex:1;min-width:0}
+.rv-name{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rv-sub{font-size:12px;color:var(--text-dim);margin-top:3px}
+.rv-acts{display:flex;gap:8px;flex:none}
+.rv-ok{border-color:rgba(46,160,67,.55);color:#3FB950}
+.rv-no{border-color:rgba(229,83,75,.5);color:#E5534B}
+.rv-empty{padding:22px 6px;text-align:center;font-size:13px;color:var(--text-dim)}
+@media (max-width:560px){.rv-item{flex-wrap:wrap}.rv-acts{width:100%;justify-content:flex-end}}
 </style>
 </head>
 <body>
+
 
 <a class="skip-link" href="#main">跳到内容</a>
 <header class="topbar">
@@ -356,6 +439,13 @@ html[data-theme="light"] .icon-sun{display:none}
       <input id="search" type="search" placeholder="搜索名称、说明或标签…" aria-label="搜索资源" autocomplete="off">
     </div>
     <div class="toolbar">
+      <div class="account" id="account" hidden>
+        <span class="role-badge" id="role-badge">成员</span>
+        <a class="btn" id="admin-link" href="https://github.com/leokkle/mc-resource-nav/tree/setups" target="_blank" rel="noopener" hidden>管理</a>
+        <button class="btn" id="upload-btn" type="button" hidden>上传</button>
+        <button class="btn" id="review-btn" type="button" hidden>待审<span class="count-dot" id="review-count" hidden></span></button>
+        <button class="btn" id="logout-btn" type="button">退出</button>
+      </div>
       <button id="random-btn" class="btn" type="button">随机挖一个</button>
       <button id="theme-toggle" class="btn icon-btn" type="button" aria-label="切换到亮色主题"><svg class="icon-sun" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="3.6"/><path d="M10 2.2v2.2M10 15.6v2.2M2.2 10h2.2M15.6 10h2.2M4.5 4.5 6.1 6.1M13.9 13.9l1.6 1.6M15.5 4.5l-1.6 1.6M6.1 13.9l-1.6 1.6"/></svg><svg class="icon-moon" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M16 12.4A6.6 6.6 0 0 1 7.6 4a6.8 6.8 0 1 0 8.4 8.4z"/></svg></button>
     </div>
@@ -988,6 +1078,43 @@ html[data-theme="light"] .icon-sun{display:none}
   </div>
 </footer>
 
+<dialog id="upload-dlg" class="dlg" aria-labelledby="up-title">
+  <div class="dlg-head">
+    <h3 id="up-title">上传到 setups 分支</h3>
+    <button class="btn dlg-close" type="button" data-close aria-label="关闭">&#10005;</button>
+  </div>
+  <div class="dlg-body">
+    <label class="up-drop" id="up-drop" for="up-file">
+      <input id="up-file" type="file">
+      <b>点击选择文件</b>
+      <span class="up-file">zip / jar / mcpack / exe 等，单文件 ≤ 40 MB</span>
+      <div class="up-picked" id="up-picked" hidden></div>
+    </label>
+    <input id="up-note" class="up-note" type="text" maxlength="120" placeholder="一句话说明（可选），例如：1.20.4 PvP 材质包">
+    <div class="up-bar" id="up-bar"><i></i></div>
+    <div class="up-msg" id="up-msg">成员上传后需管理员审核，通过后才会进入 setups 分支。</div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" type="button" data-close>取消</button>
+    <button class="btn" id="up-submit" type="button">开始上传</button>
+  </div>
+</dialog>
+
+<dialog id="review-dlg" class="dlg" aria-labelledby="rv-title">
+  <div class="dlg-head">
+    <h3 id="rv-title">待审队列</h3>
+    <button class="btn dlg-close" type="button" data-close aria-label="关闭">&#10005;</button>
+  </div>
+  <div class="dlg-body">
+    <div class="up-msg" id="rv-msg"></div>
+    <div class="rv-list" id="rv-list"><div class="rv-empty">正在读取…</div></div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" type="button" id="rv-reload">刷新</button>
+  </div>
+</dialog>
+
+
 <script>
 (function(){
   "use strict";
@@ -1550,6 +1677,17 @@ html[data-theme="light"] .icon-sun{display:none}
     });
   }
 
+  /* 优先走本站函数：由服务端带令牌读 GitHub，避免浏览器匿名限流 */
+  function fromOwn(){
+    return get("/api/setups",{credentials:"same-origin"}).then(function(r){
+      if(!r.ok) throw new Error("\u672c\u7ad9\u63a5\u53e3 "+r.status);
+      return r.json();
+    }).then(function(d){
+      if(!d || !d.ok || !Array.isArray(d.files)) throw new Error("\u63a5\u53e3\u8fd4\u56de\u7f3a\u5c11 files");
+      return d.files;
+    });
+  }
+
   function fromApi(url){
     return get(url||treeApi(),{headers:{Accept:"application/vnd.github+json"}}).then(function(r){
       if(!r.ok) throw new Error("GitHub API "+r.status);
@@ -1620,8 +1758,10 @@ html[data-theme="light"] .icon-sun{display:none}
     statusEl.className="pull-status";
     statusEl.textContent="正在拉取…";
     listEl.innerHTML='<div class="pull-empty">正在读取 setups 分支…</div>';
-    fromApi(treeApi()).then(function(list){
+    fromOwn().then(function(list){
       files=list; paint();
+    }).catch(function(){
+      return fromApi(treeApi()).then(function(list){files=list; paint();});
     }).catch(function(){
       return fromApi(proxyApi()).then(function(list){files=list; paint();});
     }).catch(function(){
@@ -1634,6 +1774,282 @@ html[data-theme="light"] .icon-sun{display:none}
   if(cdnEl) cdnEl.addEventListener("change", function(){ if(files.length) paint(); });
   if(reloadBtn) reloadBtn.addEventListener("click", load);
   load();
+})();
+</script>
+
+
+<script>/* 账号态：角色由服务端 /auth/me 下发 */
+(function(){
+  "use strict";
+  var account = document.getElementById("account");
+  var badge = document.getElementById("role-badge");
+  var adminLink = document.getElementById("admin-link");
+  var logoutBtn = document.getElementById("logout-btn");
+
+  function render(info){
+    var isAdmin = !!info && info.role === "admin";
+    if (account) account.hidden = false;
+    if (badge) {
+      badge.textContent = info ? (info.label || (isAdmin ? "管理员" : "成员")) : "成员";
+      badge.className = "role-badge " + (isAdmin ? "is-admin" : "is-member");
+    }
+    if (adminLink) adminLink.hidden = !isAdmin;
+    var refresh = document.getElementById("pull-refresh");
+    if (refresh) refresh.hidden = !isAdmin;
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", function(){ location.href = "/auth/logout"; });
+  }
+
+  fetch("/auth/me", { credentials: "same-origin", cache: "no-store" })
+    .then(function(r){
+      if (r.status === 401) { location.href = "/login.html?next=" + encodeURIComponent(location.pathname); return null; }
+      return r.json();
+    })
+    .then(function(d){ if (d && d.ok) render(d); })
+    .catch(function(){});
+})();
+</script>
+
+<script>/* 上传与审核：成员上传 → 待审；管理员直发 + 审核 */
+(function(){
+  "use strict";
+  var MAX = 40 * 1024 * 1024;
+  var role = "member";
+  var file = null;
+
+  var uploadBtn = document.getElementById("upload-btn");
+  var reviewBtn = document.getElementById("review-btn");
+  var countEl = document.getElementById("review-count");
+  var upDlg = document.getElementById("upload-dlg");
+  var rvDlg = document.getElementById("review-dlg");
+  var dropEl = document.getElementById("up-drop");
+  var fileEl = document.getElementById("up-file");
+  var pickedEl = document.getElementById("up-picked");
+  var noteEl = document.getElementById("up-note");
+  var barEl = document.getElementById("up-bar");
+  var barIn = barEl ? barEl.querySelector("i") : null;
+  var upMsg = document.getElementById("up-msg");
+  var submitBtn = document.getElementById("up-submit");
+  var rvList = document.getElementById("rv-list");
+  var rvMsg = document.getElementById("rv-msg");
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+  function fmt(n){
+    if(typeof n!=="number"||!isFinite(n)) return "大小未知";
+    var u=["B","KB","MB","GB"], i=0, v=n;
+    while(v>=1024 && i<u.length-1){v/=1024;i++;}
+    return (i===0?String(v):v.toFixed(v<10?1:0))+" "+u[i];
+  }
+  function say(el, cls, text){
+    if(!el) return;
+    el.className = "up-msg" + (cls ? " " + cls : "");
+    el.textContent = text || "";
+  }
+  function setBar(ratio){
+    if(!barEl||!barIn) return;
+    barEl.className = ratio===null ? "up-bar" : "up-bar show";
+    barIn.style.width = ratio===null ? "0%" : Math.round(Math.max(0,Math.min(1,ratio))*100)+"%";
+  }
+  function api(path, body){
+    var opt = {method: body===undefined ? "GET" : "POST", credentials:"same-origin", cache:"no-store"};
+    if(body!==undefined){ opt.headers={"Content-Type":"application/json"}; opt.body=JSON.stringify(body); }
+    return fetch(path, opt).then(function(r){
+      return r.json().catch(function(){return {};}).then(function(d){
+        if(!r.ok || d.ok===false){
+          var msg = d.message || d.error || ("请求失败 HTTP " + r.status);
+          var err = new Error(msg); err.data = d; err.status = r.status; throw err;
+        }
+        return d;
+      });
+    });
+  }
+
+  /* ---- 角色 ---- */
+  fetch("/auth/me", {credentials:"same-origin", cache:"no-store"})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d || !d.ok) return;
+      role = d.role === "admin" ? "admin" : "member";
+      if(uploadBtn) uploadBtn.hidden = false;
+      if(reviewBtn) reviewBtn.hidden = role !== "admin";
+      if(role === "admin") refreshCount();
+    })
+    .catch(function(){});
+
+  function refreshCount(){
+    if(role !== "admin" || !countEl) return;
+    api("/api/pending").then(function(d){
+      var n = d.pendingCount || 0;
+      countEl.hidden = n === 0;
+      countEl.textContent = n > 99 ? "99+" : String(n);
+    }).catch(function(){});
+  }
+
+  /* ---- 对话框开关 ---- */
+  document.querySelectorAll("[data-close]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var dlg = btn.closest("dialog");
+      if(dlg) dlg.close();
+    });
+  });
+  if(uploadBtn) uploadBtn.addEventListener("click", function(){ upDlg.showModal(); });
+  if(reviewBtn) reviewBtn.addEventListener("click", function(){ rvDlg.showModal(); loadReview(); });
+
+  /* ---- 选文件 ---- */
+  function pick(){
+    file = fileEl.files && fileEl.files[0] ? fileEl.files[0] : null;
+    if(!file){ pickedEl.hidden = true; return; }
+    pickedEl.hidden = false;
+    pickedEl.textContent = file.name + " · " + fmt(file.size);
+    if(file.size > MAX) say(upMsg, "err", "文件超过 40 MB 上限，请拆分或换用更小的包。");
+    else say(upMsg, "", role === "admin" ? "管理员上传将直接发布到 setups 分支。" : "成员上传后需管理员审核，通过后才会进入 setups 分支。");
+  }
+  if(fileEl) fileEl.addEventListener("change", pick);
+  if(dropEl){
+    ["dragover","dragenter"].forEach(function(t){
+      dropEl.addEventListener(t, function(e){ e.preventDefault(); dropEl.classList.add("is-over"); });
+    });
+    ["dragleave","drop"].forEach(function(t){
+      dropEl.addEventListener(t, function(e){ e.preventDefault(); dropEl.classList.remove("is-over"); });
+    });
+    dropEl.addEventListener("drop", function(e){
+      var f = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files[0] : null;
+      if(!f) return;
+      file = f;
+      pickedEl.hidden = false;
+      pickedEl.textContent = f.name + " · " + fmt(f.size);
+      if(f.size > MAX) say(upMsg, "err", "文件超过 40 MB 上限。");
+      else say(upMsg, "", role === "admin" ? "管理员上传将直接发布到 setups 分支。" : "成员上传后需管理员审核，通过后才会进入 setups 分支。");
+    });
+  }
+
+  function putFile(url, f, contentType){
+    return new Promise(function(resolve, reject){
+      var xhr = new XMLHttpRequest();
+      xhr.open("PUT", url, true);
+      xhr.setRequestHeader("Content-Type", contentType || "application/octet-stream");
+      if(xhr.upload){
+        xhr.upload.onprogress = function(e){ if(e.lengthComputable) setBar(e.loaded / e.total * 0.9); };
+      }
+      xhr.onload = function(){
+        if(xhr.status >= 200 && xhr.status < 300) resolve();
+        else reject(new Error("存储写入失败（HTTP " + xhr.status + "）"));
+      };
+      xhr.onerror = function(){ reject(new Error("上传网络中断，可能是对象存储跨域被拦截")); };
+      xhr.send(f);
+    });
+  }
+
+  function reloadSetupList(){
+    var btn = document.getElementById("pull-refresh");
+    if(btn) btn.click();
+  }
+
+  if(submitBtn) submitBtn.addEventListener("click", function(){
+    if(!file){ say(upMsg, "err", "先选一个文件"); return; }
+    if(file.size > MAX){ say(upMsg, "err", "文件超过 40 MB 上限"); return; }
+    submitBtn.disabled = true;
+    var label = submitBtn.textContent;
+    submitBtn.textContent = "上传中…";
+    setBar(0);
+    say(upMsg, "", "正在申请上传地址…");
+
+    var selected = file;
+    api("/api/upload-url", {
+      name: selected.name,
+      size: selected.size,
+      type: selected.type || "application/octet-stream",
+      note: noteEl ? noteEl.value : ""
+    }).then(function(d){
+      say(upMsg, "", "正在上传 " + fmt(selected.size) + "…");
+      return putFile(d.uploadUrl, selected, d.contentType).then(function(){
+        setBar(0.95);
+        say(upMsg, "", "正在写入 setups 分支…");
+        return api("/api/upload-commit", { id: d.id });
+      });
+    }).then(function(d){
+      setBar(1);
+      if(d.status === "published"){
+        say(upMsg, "ok", "已发布：" + d.name + "；列表稍有缓存延迟，可点「重新拉取」。");
+        reloadSetupList();
+      } else {
+        say(upMsg, "ok", "已提交待审，管理员通过后会出现在 setups 分支。");
+        if(role === "admin") refreshCount();
+      }
+      file = null;
+      if(fileEl) fileEl.value = "";
+      if(pickedEl) pickedEl.hidden = true;
+      if(noteEl) noteEl.value = "";
+      setTimeout(function(){ setBar(null); }, 900);
+    }).catch(function(err){
+      setBar(null);
+      say(upMsg, "err", "失败：" + (err && err.message ? err.message : "未知错误"));
+    }).then(function(){
+      submitBtn.disabled = false;
+      submitBtn.textContent = label;
+    });
+  });
+
+  /* ---- 审核队列 ---- */
+  function loadReview(){
+    say(rvMsg, "", "正在读取待审记录…");
+    rvList.innerHTML = '<div class="rv-empty">正在读取…</div>';
+    api("/api/pending").then(function(d){
+      var items = d.items || [];
+      if(!items.length){
+        say(rvMsg, "", "当前没有待审文件。");
+        rvList.innerHTML = '<div class="rv-empty">队列是空的</div>';
+        return;
+      }
+      say(rvMsg, "", "共 " + items.length + " 个待审文件，通过后会直接提交到 setups 分支。");
+      rvList.innerHTML = items.map(function(it){
+        return '<div class="rv-item" data-id="' + esc(it.id) + '">' +
+          '<div class="rv-main">' +
+            '<div class="rv-name">' + esc(it.name) + '</div>' +
+            '<div class="rv-sub">' + esc(fmt(it.size)) + ' · ' + esc(it.label || (it.role === "admin" ? "管理员" : "成员")) +
+              ' · ' + esc(new Date(it.createdAt).toLocaleString("zh-CN", {hour12:false})) +
+              (it.note ? ' · ' + esc(it.note) : '') + '</div>' +
+          '</div>' +
+          '<div class="rv-acts">' +
+            '<button class="btn rv-ok" type="button" data-act="approve">通过</button>' +
+            '<button class="btn rv-no" type="button" data-act="reject">驳回</button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+      if(countEl){ countEl.hidden = true; countEl.textContent = ""; }
+    }).catch(function(err){
+      say(rvMsg, "err", "读取失败：" + (err && err.message ? err.message : "未知错误"));
+      rvList.innerHTML = '<div class="rv-empty">读取失败</div>';
+    });
+  }
+
+  if(rvList) rvList.addEventListener("click", function(e){
+    var btn = e.target.closest ? e.target.closest("button[data-act]") : null;
+    if(!btn) return;
+    var row = btn.closest(".rv-item");
+    if(!row) return;
+    var id = row.getAttribute("data-id");
+    var action = btn.getAttribute("data-act");
+    btn.disabled = true;
+    btn.textContent = action === "approve" ? "发布中…" : "处理中…";
+    api("/api/review", {id: id, action: action, reason: action === "reject" ? "管理员驳回" : ""})
+      .then(function(){
+        row.style.opacity = ".45";
+        loadReview();
+        reloadSetupList();
+        refreshCount();
+      })
+      .catch(function(err){
+        btn.disabled = false;
+        btn.textContent = action === "approve" ? "通过" : "驳回";
+        say(rvMsg, "err", "操作失败：" + (err && err.message ? err.message : "未知错误"));
+      });
+  });
+
+  var rvReload = document.getElementById("rv-reload");
+  if(rvReload) rvReload.addEventListener("click", loadReview);
 })();
 </script>
 </body>
