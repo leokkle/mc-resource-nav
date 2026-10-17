@@ -189,7 +189,7 @@ html[data-theme="light"] .icon-sun{display:none}
   .grid{grid-template-columns:1fr}
 }
 
-/* ===== 在线下载台（Modrinth 镜像） ===== */
+/* ===== 在线下载台（CurseForge 镜像） ===== */
 .mr{--focus-c:var(--c-mod);margin:0 0 28px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
 .mr-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .mr-head h2{font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -296,9 +296,9 @@ html[data-theme="light"] .icon-sun{display:none}
         <h2 id="h-mr">
           <span class="cat-icon" aria-hidden="true" style="color:var(--ink-mod)"><svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 2.6v8M6.2 8 9 10.8 11.8 8"/><path d="M3.2 12.2v1.6c0 .8.6 1.4 1.4 1.4h8.8c.8 0 1.4-.6 1.4-1.4v-1.6"/></svg></span>
           在线下载台
-          <span class="mr-tagline">Modrinth 镜像</span>
+          <span class="mr-tagline">CurseForge 镜像</span>
         </h2>
-        <span class="mr-note">选好版本和加载器，点下载直接拿文件，不用跳到外站再找。</span>
+        <span class="mr-note">搜到就能直接选文件下载，走国内镜像加速，不用跳到外站再找。</span>
       </header>
       <div class="mr-types" role="group" aria-label="资源类型">
         <button class="mr-type" type="button" data-type="mod" aria-pressed="true">模组</button>
@@ -309,7 +309,7 @@ html[data-theme="light"] .icon-sun{display:none}
       <form class="mr-filters" id="mr-form">
         <div class="mr-field mr-field-grow">
           <label for="mr-q">关键词</label>
-          <input id="mr-q" type="search" placeholder="sodium / 钠 / 优化…回车搜索" autocomplete="off">
+          <input id="mr-q" type="search" placeholder="jei / 机械动力 / 优化…回车搜索" autocomplete="off">
         </div>
         <div class="mr-field">
           <label for="mr-mc">游戏版本</label>
@@ -1082,23 +1082,23 @@ html[data-theme="light"] .icon-sun{display:none}
   update();
 })();
 </script>
-<script>
-/* 在线下载台：Modrinth 镜像（API 走 mod.mcimirror.top，文件经镜像路由 302 到官方 CDN） */
+<script>/* 在线下载台：CurseForge 镜像（接口与文件均走 mod.mcimirror.top） */
 (function(){
   "use strict";
-  var API = "https://mod.mcimirror.top/modrinth/v2";
-  var OFFICIAL = "https://api.modrinth.com/v2";
-  var CDN_HOST = "https://mod.mcimirror.top";
+  var API = "https://mod.mcimirror.top/curseforge/v1";
+  var MIRROR = "https://mod.mcimirror.top";
+  var GAME_ID = 432;
+  var CLASS = { mod:6, shader:6552, resourcepack:12, modpack:4471 };
   var TYPE_NAMES = { mod:"模组", shader:"光影", resourcepack:"资源包", modpack:"整合包" };
-  var LOADER_LABELS = { fabric:"Fabric", forge:"Forge", neoforge:"NeoForge", quilt:"Quilt", liteloader:"LiteLoader", iris:"Iris", optifine:"OptiFine", canvas:"Canvas", minecraft:"原版" };
-  var LOADER_ORDER = { fabric:1, forge:2, neoforge:3, quilt:4, minecraft:1, iris:1, optifine:2, canvas:3, liteloader:9 };
-  var FALLBACK_LOADERS = {
-    mod:["fabric","forge","neoforge","quilt","liteloader"],
-    shader:["iris","optifine","canvas"],
-    resourcepack:["minecraft"],
-    modpack:["fabric","forge","neoforge","quilt"]
+  var LOADERS = {
+    mod:[4, 1, 6, 5],
+    modpack:[4, 1, 6, 5],
+    shader:[1, 4, 6],
+    resourcepack:[1, 4, 6]
   };
-  var state = { type:"mod", offset:0, limit:10, total:0, loading:false, mirrorOk:true, loaders:null };
+  var LOADER_LABELS = { 1:"Forge", 4:"Fabric", 5:"Quilt", 6:"NeoForge" };
+  var SORT_DOWNLOADS = 6;
+  var state = { type:"mod", index:0, pageSize:12, total:0, loading:false };
 
   function $(id){ return document.getElementById(id); }
   var el = {
@@ -1131,55 +1131,52 @@ html[data-theme="light"] .icon-sun{display:none}
 
   function apiFetch(path, params){
     var q = params ? ("?" + params) : "";
-    function get(base){
-      return fetch(base + path + q).then(function(r){
+    function once(){
+      return fetch(API + path + q, { headers: { "Accept": "application/json" } }).then(function(r){
         if (!r.ok) { throw new Error("HTTP " + r.status); }
         return r.json();
       });
     }
-    return get(API).catch(function(err){
-      state.mirrorOk = false;
-      return get(OFFICIAL).catch(function(){ throw err; });
+    return once().catch(function(first){
+      return new Promise(function(res){ setTimeout(res, 700); }).then(once).catch(function(){ throw first; });
     });
   }
 
   function fillLoaders(){
-    var names = [];
-    var all = state.loaders;
-    if (all && all.length) {
-      all.forEach(function(l){
-        var types = l.supported_project_types || l.project_types || [];
-        if (types.indexOf(state.type) !== -1) { names.push(l.name); }
-      });
-    }
-    if (!names.length) { names = FALLBACK_LOADERS[state.type] || []; }
-    names.sort(function(a, b){ return (LOADER_ORDER[a] || 9) - (LOADER_ORDER[b] || 9); });
+    var list = LOADERS[state.type] || [];
     var keep = el.loader.value;
     var html = '<option value="">不限</option>';
-    names.forEach(function(n){
-      html += '<option value="' + esc(n) + '">' + esc(LOADER_LABELS[n] || n) + '</option>';
+    list.forEach(function(v){
+      html += '<option value="' + v + '">' + esc(LOADER_LABELS[v] || v) + '</option>';
     });
     el.loader.innerHTML = html;
-    if (names.indexOf(keep) !== -1) { el.loader.value = keep; }
+    if (keep && list.indexOf(Number(keep)) !== -1) { el.loader.value = keep; }
+    el.loader.disabled = !list.length;
   }
 
-  function pickFile(v){
-    if (!v || !v.files || !v.files.length) { return null; }
-    for (var i = 0; i < v.files.length; i++) {
-      if (v.files[i].primary) { return v.files[i]; }
-    }
-    return v.files[0];
-  }
-  function mirrorUrl(u){
-    return String(u || "").replace(/^https?:\/\/cdn\.modrinth\.com\//, CDN_HOST + "/");
+  function mirrorFile(u){
+    return String(u || "").replace(/^https?:\/\/(edge|mediafilez)\.forgecdn\.net\//i, MIRROR + "/");
   }
   function fileUrl(u){
-    return el.proxy.checked ? mirrorUrl(u) : u;
+    return el.proxy.checked ? mirrorFile(u) : u;
   }
+
+  function pickFile(files){
+    if (!files || !files.length) { return null; }
+    var copy = files.slice(0).sort(function(a, b){
+      return String(b.fileDate || "").localeCompare(String(a.fileDate || ""));
+    });
+    for (var i = 0; i < copy.length; i++) {
+      if (copy[i].downloadUrl) { return copy[i]; }
+    }
+    return copy[0];
+  }
+
   function triggerDownload(url, name){
     var a = document.createElement("a");
     a.href = url;
     a.rel = "noopener";
+    a.target = "_blank";
     if (name) { a.setAttribute("download", name); }
     document.body.appendChild(a);
     a.click();
@@ -1197,57 +1194,37 @@ html[data-theme="light"] .icon-sun{display:none}
     p.className = (cls ? "mr-line " + cls : "mr-line") + (warn ? " warn" : "");
   }
 
-  function resolveVersions(id){
-    var filters = [];
-    if (el.mc.value) { filters.push("game_versions=" + encodeURIComponent(JSON.stringify([el.mc.value]))); }
-    if (el.loader.value) { filters.push("loaders=" + encodeURIComponent(JSON.stringify([el.loader.value]))); }
-    var q = filters.join("&");
-    return apiFetch("/project/" + encodeURIComponent(id) + "/version", q).then(function(list){
-      if ((list && list.length) || !q) { return { list: list || [], relaxed: false }; }
-      return apiFetch("/project/" + encodeURIComponent(id) + "/version").then(function(all){
-        return { list: all || [], relaxed: true };
+  function fetchFiles(id){
+    var params = "pageSize=30";
+    if (el.mc.value) { params += "&gameVersion=" + encodeURIComponent(el.mc.value); }
+    if (el.loader.value) { params += "&modLoaderType=" + encodeURIComponent(el.loader.value); }
+    return apiFetch("/mods/" + encodeURIComponent(id) + "/files", params).then(function(d){
+      var list = (d && d.data) || [];
+      if (list.length || (!el.mc.value && !el.loader.value)) { return { list: list, relaxed: false }; }
+      return apiFetch("/mods/" + encodeURIComponent(id) + "/files", "pageSize=30").then(function(all){
+        return { list: (all && all.data) || [], relaxed: true };
       });
     });
-  }
-
-  function showDeps(v, item){
-    var ids = [];
-    (v.dependencies || []).forEach(function(d){
-      if (d.dependency_type === "required" && d.project_id && ids.indexOf(d.project_id) === -1) { ids.push(d.project_id); }
-    });
-    if (!ids.length) { return; }
-    apiFetch("/projects", "ids=" + encodeURIComponent(JSON.stringify(ids))).then(function(list){
-      var links = (list || []).map(function(p){
-        return '<a href="https://modrinth.com/' + esc(p.project_type || "mod") + "/" + esc(p.slug) + '" target="_blank" rel="noopener">' + esc(p.title) + "</a>";
-      });
-      if (links.length) { setLine(item, "该版本需要前置：" + links.join("、") + "（记得一起装）", true, "mr-dep"); }
-    }).catch(function(){});
   }
 
   function downloadLatest(item, btn){
     var id = item.getAttribute("data-id");
     btn.disabled = true;
     btn.textContent = "查找中…";
-    resolveVersions(id).then(function(res){
-      if (!res.list.length) {
-        setLine(item, "这个项目没有可下载的文件。", true);
-        return;
-      }
-      var v = res.list[0];
-      var f = pickFile(v);
+    fetchFiles(id).then(function(res){
+      var f = pickFile(res.list);
       if (!f) {
-        setLine(item, "版本的下载文件缺失，换一个版本试试。", true);
+        setLine(item, "这个项目没有可下载的文件，去 CurseForge 页面看看。", true);
         return;
       }
-      triggerDownload(fileUrl(f.url), f.filename);
+      triggerDownload(fileUrl(f.downloadUrl), f.fileName);
       setLine(item,
-        "已开始下载 " + esc(f.filename) + " · " + fmtSize(f.size) +
-        (res.relaxed ? "（当前筛选没有匹配版本，已改用最新版）" : "") +
-        ' · <a href="' + esc(f.url) + '" target="_blank" rel="noopener">直连备用</a>',
+        "已开始下载 " + esc(f.fileName) + " · " + fmtSize(f.fileLength) +
+        (res.relaxed ? "（当前筛选没有匹配文件，已改用最新版）" : "") +
+        ' · <a href="' + esc(f.downloadUrl) + '" target="_blank" rel="noopener">直连备用</a>',
         !!res.relaxed);
-      showDeps(v, item);
     }).catch(function(err){
-      setLine(item, "下载信息获取失败：" + esc(err.message) + "，稍后重试或直接去 Modrinth 页面。", true);
+      setLine(item, "下载信息获取失败：" + esc(err.message) + "，稍后重试或去 CurseForge 页面。", true);
     }).then(function(){
       btn.disabled = false;
       btn.textContent = "下载";
@@ -1259,43 +1236,43 @@ html[data-theme="light"] .icon-sun{display:none}
     if (!box.hidden) { box.hidden = true; return; }
     box.hidden = false;
     if (box.getAttribute("data-loaded") === "1") { return; }
-    box.innerHTML = '<div class="mr-vrow"><span class="vm">正在加载版本…</span></div>';
-    resolveVersions(id).then(function(res){
-      if (!res.list.length) {
-        box.innerHTML = '<div class="mr-vrow"><span class="vm">没有可下载版本</span></div>';
+    box.innerHTML = '<div class="mr-vrow"><span class="vm">正在加载文件…</span></div>';
+    fetchFiles(id).then(function(res){
+      var files = (res.list || []).filter(function(f){ return !!f.downloadUrl; }).slice(0, 8);
+      if (!files.length) {
+        box.innerHTML = '<div class="mr-vrow"><span class="vm">没有可下载文件</span></div>';
         return;
       }
-      var rows = res.list.slice(0, 8).map(function(v){
-        var f = pickFile(v);
-        if (!f) { return ""; }
-        var mcs = (v.game_versions || []).slice(-4).join(" / ");
-        var lds = (v.loaders || []).join(" / ");
-        return '<div class="mr-vrow"><span class="vn">' + esc(v.version_number) + "</span>" +
-          '<span class="vm">' + esc(mcs) + (lds ? " · " + esc(lds) : "") + " · " + fmtSize(f.size) + "</span>" +
-          '<a class="mr-vdl" href="' + esc(fileUrl(f.url)) + '" download="' + esc(f.filename) + '" rel="noopener">下载</a>' +
-          (el.proxy.checked ? '<a class="mr-vdl mr-vdl-alt" href="' + esc(f.url) + '" download="' + esc(f.filename) + '" rel="noopener">直连</a>' : "") + '</div>';
+      var rows = files.map(function(f){
+        var tags = (f.gameVersions || []).filter(function(v){ return /^\d+\.\d+/.test(v); }).slice(0, 4).join(" / ");
+        var lds = (f.gameVersions || []).filter(function(v){ return LOADER_LABELS[v] || ["Forge","Fabric","Quilt","NeoForge"].indexOf(v) !== -1; }).join(" / ");
+        return '<div class="mr-vrow"><span class="vn">' + esc(f.displayName || f.fileName) + "</span>" +
+          '<span class="vm">' + esc(tags) + (lds ? " · " + esc(lds) : "") + " · " + fmtSize(f.fileLength) + "</span>" +
+          '<a class="mr-vdl" href="' + esc(fileUrl(f.downloadUrl)) + '" target="_blank" rel="noopener">下载</a>' +
+          (el.proxy.checked ? '<a class="mr-vdl mr-vdl-alt" href="' + esc(f.downloadUrl) + '" target="_blank" rel="noopener">直连</a>' : "") + "</div>";
       }).join("");
-      box.innerHTML = rows + (res.relaxed ? '<div class="mr-vrow"><span class="vm">当前筛选没有匹配版本，以上是该类型下最新的版本</span></div>' : "");
+      box.innerHTML = rows + (res.relaxed ? '<div class="mr-vrow"><span class="vm">当前筛选没有匹配文件，以上是该项目最新的文件</span></div>' : "");
       box.setAttribute("data-loaded", "1");
     }).catch(function(err){
-      box.innerHTML = '<div class="mr-vrow"><span class="vm">版本加载失败：' + esc(err.message) + "</span></div>";
+      box.innerHTML = '<div class="mr-vrow"><span class="vm">文件列表加载失败：' + esc(err.message) + "</span></div>";
     });
   }
 
-  function render(hits){
+  function render(items){
     var html = "";
-    hits.forEach(function(h){
-      var letter = String(h.title || "?").trim().charAt(0).toUpperCase();
-      var ptype = h.project_type || state.type;
-      var tags = (h.categories || []).slice(0, 4).map(function(c){
-        return '<span class="mr-tag">' + esc(c) + "</span>";
+    items.forEach(function(m){
+      var letter = String(m.name || "?").trim().charAt(0).toUpperCase();
+      var authors = (m.authors || []).map(function(a){ return a.name; }).slice(0, 2).join(" / ") || "—";
+      var tags = (m.categories || []).slice(0, 3).map(function(c){
+        return '<span class="mr-tag">' + esc(c.name) + "</span>";
       }).join("");
-      html += '<article class="mr-item" data-id="' + esc(h.project_id) + '">' +
+      var page = (m.links && m.links.websiteUrl) || ("https://www.curseforge.com/minecraft/mc-mods/" + m.slug);
+      html += '<article class="mr-item" data-id="' + esc(m.id) + '">' +
         '<span class="mr-mark" aria-hidden="true">' + esc(letter) + "</span>" +
         '<div class="mr-info">' +
-          '<h3 class="mr-title"><a href="https://modrinth.com/' + esc(ptype) + "/" + esc(h.slug) + '" target="_blank" rel="noopener">' + esc(h.title) + "</a></h3>" +
-          '<p class="mr-sub">' + esc(h.description) + "</p>" +
-          '<div class="mr-stats">作者 ' + esc(h.author || "—") + " · 下载 " + fmtNum(h.downloads) + " · 收藏 " + fmtNum(h.follows) + "</div>" +
+          '<h3 class="mr-title"><a href="' + esc(page) + '" target="_blank" rel="noopener">' + esc(m.name) + "</a></h3>" +
+          '<p class="mr-sub">' + esc(m.summary) + "</p>" +
+          '<div class="mr-stats">作者 ' + esc(authors) + " · 下载 " + fmtNum(m.downloadCount) + " · 收藏 " + fmtNum(m.favoriteCount) + "</div>" +
           (tags ? '<div class="mr-tags">' + tags + "</div>" : "") +
         "</div>" +
         '<div class="mr-act">' +
@@ -1303,7 +1280,6 @@ html[data-theme="light"] .icon-sun{display:none}
           '<button class="btn mr-versbtn" type="button">选版本</button>' +
         "</div>" +
         '<p class="mr-line" hidden></p>' +
-        '<p class="mr-line mr-dep" hidden></p>' +
         '<div class="mr-vers" hidden></div>' +
       "</article>";
     });
@@ -1314,25 +1290,28 @@ html[data-theme="light"] .icon-sun{display:none}
     if (state.loading) { return; }
     state.loading = true;
     if (reset) {
-      state.offset = 0;
+      state.index = 0;
       state.total = 0;
       el.results.innerHTML = "";
       el.more.hidden = true;
     }
     setStatus(reset ? "正在搜索…" : "正在加载更多…");
+    var params = "gameId=" + GAME_ID +
+      "&classId=" + CLASS[state.type] +
+      "&index=" + state.index +
+      "&pageSize=" + state.pageSize +
+      "&sortField=" + SORT_DOWNLOADS +
+      "&sortOrder=desc";
     var q = el.q.value.trim();
-    var facets = [["project_type:" + state.type]];
-    if (el.mc.value) { facets.push(["versions:" + el.mc.value]); }
-    if (el.loader.value) { facets.push(["categories:" + el.loader.value]); }
-    var params = "query=" + encodeURIComponent(q) +
-      "&limit=" + state.limit + "&offset=" + state.offset +
-      "&index=" + (q ? "relevance" : "downloads") +
-      "&facets=" + encodeURIComponent(JSON.stringify(facets));
-    apiFetch("/search", params).then(function(data){
-      var hits = (data && data.hits) || [];
-      state.total = Number(data && data.total_hits) || 0;
-      if (!hits.length) {
-        if (state.offset === 0) {
+    if (q) { params += "&searchFilter=" + encodeURIComponent(q); }
+    if (el.mc.value) { params += "&gameVersion=" + encodeURIComponent(el.mc.value); }
+    if (el.loader.value) { params += "&modLoaderType=" + encodeURIComponent(el.loader.value); }
+    apiFetch("/mods/search", params).then(function(d){
+      var items = (d && d.data) || [];
+      var pg = (d && d.pagination) || {};
+      state.total = Number(pg.totalCount) || 0;
+      if (!items.length) {
+        if (state.index === 0) {
           el.results.innerHTML = '<div class="mr-empty">没有匹配的' + esc(TYPE_NAMES[state.type]) +
             "。换个关键词，或者把游戏版本、加载器调成“全部版本 / 不限”再试。</div>";
         }
@@ -1340,11 +1319,10 @@ html[data-theme="light"] .icon-sun{display:none}
         el.more.hidden = true;
         return;
       }
-      render(hits);
-      state.offset += hits.length;
-      el.more.hidden = state.offset >= state.total;
-      setStatus("共 " + state.total + " 个 · 已显示 " + state.offset + " 个" +
-        (state.mirrorOk ? "" : "（镜像不稳，已改用官方接口）"));
+      render(items);
+      state.index += items.length;
+      el.more.hidden = state.index >= state.total;
+      setStatus("共 " + state.total + " 个 · 已显示 " + state.index + " 个 · 数据来自 CurseForge 镜像");
     }).catch(function(err){
       setStatus("搜索失败：" + err.message + "，检查网络后重试。", true);
     }).then(function(){
@@ -1396,12 +1374,11 @@ html[data-theme="light"] .icon-sun{display:none}
   /* 初始化：加载器 / 游戏版本 / 首屏热门 */
   fillLoaders();
   search(true);
-  apiFetch("/tag/loader").then(function(list){
-    state.loaders = list;
-    fillLoaders();
-  }).catch(function(){});
-  apiFetch("/tag/game_version").then(function(list){
-    var rel = (list || []).filter(function(v){ return v.version_type === "release"; });
+  fetch("https://mod.mcimirror.top/modrinth/v2/tag/game_version").then(function(r){
+    if (!r.ok) { throw new Error("HTTP " + r.status); }
+    return r.json();
+  }).then(function(list){
+    var rel = (list || []).filter(function(v){ return v.version_type === "release"; }).slice(0, 60);
     var keep = el.mc.value;
     var html = '<option value="">全部版本</option>';
     rel.forEach(function(v){
