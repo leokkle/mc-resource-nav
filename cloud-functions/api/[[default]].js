@@ -378,7 +378,16 @@ async function handleReview(request, env, user) {
   const store = await getStoreInstance();
   const meta = await store.get("meta/" + id + ".json", { type: "json", consistency: "strong" });
   if (!meta) return json({ ok: false, error: "record_not_found" }, 404);
-  if (meta.status !== "pending") return json({ ok: false, error: "not_pending", status: meta.status }, 409);
+  /* 待审列表同时会列出 uploading（上传未收尾）的记录，因此这两种状态都允许审核：
+   * 通过 → 轮询读源文件后发布；驳回 → 直接删除 stage 对象收尾。 */
+  if (meta.status !== "pending" && meta.status !== "uploading") {
+    return json({
+      ok: false,
+      error: "not_pending",
+      status: meta.status,
+      message: "该记录当前状态为 " + meta.status + "，已不能审核（可能已发布、已驳回或已作废）"
+    }, 409);
+  }
 
   meta.reviewedAt = new Date().toISOString();
   meta.reviewer = user.label;
@@ -387,7 +396,7 @@ async function handleReview(request, env, user) {
     meta.status = "rejected";
     meta.reviewNote = String((body && body.reason) || "").slice(0, 200) || "管理员驳回";
     await store.setJSON("meta/" + id + ".json", meta);
-    await store.delete(meta.stageKey);
+    if (meta.stageKey) { try { await store.delete(meta.stageKey); } catch (e) {} }
     return json({ ok: true, status: "rejected" });
   }
 
