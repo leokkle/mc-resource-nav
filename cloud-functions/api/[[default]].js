@@ -19,6 +19,11 @@ const COOKIE = "mcnav_t";
 const STORE_NAME = "mcnav";
 const MAX_BYTES = 40 * 1024 * 1024;
 const MAX_FILES_IN_LIST = 300;
+/* 上传中断后长时间停留在 uploading 的记录，超过该时长自动作废并从待审队列剔除 */
+const STALE_UPLOAD_MS = 30 * 60 * 1000;
+/* 对象存储写入后存在可读延迟，读取 stage 对象时按间隔重试 */
+const STAGE_READ_ATTEMPTS = 6;
+const STAGE_READ_GAP_MS = 1000;
 
 const ALLOWED_EXT = new Set([
   "zip", "jar", "mcpack", "mcworld", "mca", "litematic", "schematic", "dat", "nbt",
@@ -213,6 +218,24 @@ async function publishToBranch(env, name, buffer) {
 
 /* ---------------- 业务处理 ---------------- */
 
+function sleep(ms) {
+  return new Promise(function (resolve) { setTimeout(resolve, ms); });
+}
+
+/* 预签名 PUT 返回 2xx 后，Blob 对象并非立刻可读（实测存在数秒延迟）。
+ * 单次 get 会误判为「没有收到文件内容」，这里改为短轮询，读到非空内容即返回。 */
+async function readStageBuffer(store, key, attempts, gapMs) {
+  const total = attempts || STAGE_READ_ATTEMPTS;
+  const gap = typeof gapMs === "number" ? gapMs : STAGE_READ_GAP_MS;
+  for (let i = 0; i < total; i++) {
+    let buffer = null;
+    try { buffer = await store.get(key, { type: "arrayBuffer", consistency: "strong" }); } catch (e) { buffer = null; }
+    if (buffer && buffer.byteLength) return buffer;
+    if (i < total - 1) await sleep(gap);
+  }
+  return null;
+}
+
 async function handleUploadUrl(request, env, user) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ ok: false, error: "bad_body" }, 400); }
@@ -267,8 +290,12 @@ async function handleUploadCommit(request, env, user) {
   const meta = await store.get("meta/" + id + ".json", { type: "json", consistency: "strong" });
   if (!meta) return json({ ok: false, error: "record_not_found" }, 404);
 
-  const buffer = await store.get(meta.stageKey, { type: "arrayBuffer", consistency: "strong" });
-  if (!buffer || !buffer.byteLength) return json({ ok: false, error: "upload_not_found", message: "没有收到文件内容，请重新上传" }, 409);
+  const buffer = await readStageBuffer(store, meta.stageKey, STAGE_READ_ATTEMPTS, STAGE_READ_GAP_MS);
+  if (!buffer || !buffer.byteLength) {
+    meta.reviewNote = "上传未完成：对象存储未在限定时间内返回文件内容（可重新上传）";
+    try { await store.setJSON("meta/" + id + ".json", meta); } catch (e) {}
+    return json({ ok: false, error: "upload_not_found", message: "没有收到文件内容，请重新上传" }, 409);
+  }
 
   meta.size = buffer.byteLength;
   meta.uploadedAt = new Date().toISOString();
@@ -304,6 +331,14 @@ async function handlePending(env, user) {
   for (let i = 0; i < keys.length; i++) {
     const m = await store.get(keys[i], { type: "json", consistency: "strong" });
     if (!m || !m.id) continue;
+    /* 长时间停留在 uploading 的残记录（上传中断 / commit 未成功）自动作废，避免堆积在待审队列 */
+    if (m.status === "uploading" && m.createdAt && (Date.now() - new Date(m.createdAt).getTime()) > STALE_UPLOAD_MS) {
+      m.status = "expired";
+      m.reviewNote = "上传未完成，已自动作废";
+      try { await store.setJSON(keys[i], m); } catch (e) {}
+      if (m.stageKey) { try { await store.delete(m.stageKey); } catch (e) {} }
+      continue;
+    }
     if (m.status === "pending" || m.status === "uploading") {
       items.push({
         id: m.id,
@@ -356,8 +391,10 @@ async function handleReview(request, env, user) {
     return json({ ok: true, status: "rejected" });
   }
 
-  const buffer = await store.get(meta.stageKey, { type: "arrayBuffer", consistency: "strong" });
-  if (!buffer || !buffer.byteLength) return json({ ok: false, error: "upload_not_found" }, 409);
+  const buffer = await readStageBuffer(store, meta.stageKey, 4, STAGE_READ_GAP_MS);
+  if (!buffer || !buffer.byteLength) {
+    return json({ ok: false, error: "upload_not_found", message: "源文件已不可读，可能上传未完成，请让上传者重新提交" }, 409);
+  }
 
   try {
     const result = await publishToBranch(env, meta.name, buffer);
