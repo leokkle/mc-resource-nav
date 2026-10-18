@@ -1802,11 +1802,22 @@ body.auth-locked{overflow:hidden}
     logoutBtn.addEventListener("click", function(){ location.href = "/auth/logout"; });
   }
 
-  fetch("/auth/me", { credentials: "same-origin", cache: "no-store" })
-    .then(function(r){
-      if (r.status === 401) { location.href = "/login.html?next=" + encodeURIComponent(location.pathname); return null; }
-      return r.json();
-    })
+  /* /auth/me 偶发失败时不能静默停在默认角色，否则「上传」「待审」入口不显示 —— 有限重试 */
+  function loadMe(attempt){
+    return fetch("/auth/me", { credentials: "same-origin", cache: "no-store" })
+      .then(function(r){
+        if (r.status === 401) { location.href = "/login.html?next=" + encodeURIComponent(location.pathname); return null; }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .catch(function(err){
+        if (attempt >= 2) throw err;
+        return new Promise(function(res){ setTimeout(res, 700 * (attempt + 1)); })
+          .then(function(){ return loadMe(attempt + 1); });
+      });
+  }
+
+  loadMe(0)
     .then(function(d){ if (d && d.ok) render(d); })
     .catch(function(){});
 })();
@@ -1866,17 +1877,40 @@ body.auth-locked{overflow:hidden}
     });
   }
 
+  /* 直传 PUT 成功后存储对象可能短暂不可读，后端会返回 409 upload_not_found，这里做有限重试 */
+  function commitUpload(id, attempt){
+    attempt = attempt || 0;
+    return api("/api/upload-commit", { id: id }).catch(function(err){
+      var retriable = err && err.status === 409 && err.data && err.data.error === "upload_not_found";
+      if(!retriable || attempt >= 2) throw err;
+      say(upMsg, "", "存储尚未就绪，正在重试（" + (attempt + 1) + "/2）…");
+      return new Promise(function(res){ setTimeout(res, 1500 * (attempt + 1)); })
+        .then(function(){ return commitUpload(id, attempt + 1); });
+    });
+  }
+
   /* ---- 角色 ---- */
-  fetch("/auth/me", {credentials:"same-origin", cache:"no-store"})
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){
-      if(!d || !d.ok) return;
-      role = d.role === "admin" ? "admin" : "member";
-      if(uploadBtn) uploadBtn.hidden = false;
-      if(reviewBtn) reviewBtn.hidden = role !== "admin";
-      if(role === "admin") refreshCount();
-    })
-    .catch(function(){});
+  function loadRole(attempt){
+    return fetch("/auth/me", {credentials:"same-origin", cache:"no-store"})
+      .then(function(r){
+        if (r.status === 401) return null;
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function(d){
+        if(!d || !d.ok) return;
+        role = d.role === "admin" ? "admin" : "member";
+        if(uploadBtn) uploadBtn.hidden = false;
+        if(reviewBtn) reviewBtn.hidden = role !== "admin";
+        if(role === "admin") refreshCount();
+      })
+      .catch(function(err){
+        if (attempt >= 2) throw err;
+        return new Promise(function(res){ setTimeout(res, 700 * (attempt + 1)); })
+          .then(function(){ return loadRole(attempt + 1); });
+      });
+  }
+  loadRole(0).catch(function(){});
 
   function refreshCount(){
     if(role !== "admin" || !countEl) return;
@@ -1967,7 +2001,7 @@ body.auth-locked{overflow:hidden}
       return putFile(d.uploadUrl, selected, d.contentType).then(function(){
         setBar(0.95);
         say(upMsg, "", "正在写入 setups 分支…");
-        return api("/api/upload-commit", { id: d.id });
+        return commitUpload(d.id);
       });
     }).then(function(d){
       setBar(1);
